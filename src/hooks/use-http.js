@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-const useHttp = (requestConfig, applyData) => {
+const useHttp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const sendRequest = async () => {
+  //useCallback makes sure that we do not create the function on every evaluation instead use a cached version
+  const sendRequest = useCallback(async (requestConfig, resultHandler) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -23,12 +23,12 @@ const useHttp = (requestConfig, applyData) => {
 
       const data = await response.json();
 
-      applyData(data);
+      resultHandler(data);
     } catch (err) {
       setError(err.message || 'Something went wrong!');
     }
     setIsLoading(false);
-  };
+  }, []);
 
   return {
     isLoading,

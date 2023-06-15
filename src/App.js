@@ -7,27 +7,26 @@ import useHttp from './hooks/use-http';
 function App() {
   const [tasks, setTasks] = useState([]);
 
-  const transformTasks = tasksOObj => {
-    const loadedTasks = [];
+  // useHttp is a custom hook that gives us couple of states and one function to send http requests
+  // the returned function takes a configuration object and a handler function to handle the result
 
-    for (const taskKey in tasksOObj) {
-      loadedTasks.push({ id: taskKey, text: tasksOObj[taskKey].text });
-    }
-
-    setTasks(loadedTasks);
-  }
-
-  // useHttp is a custom hook that takes a configuration object and a function to handle the results
-  // it returns isLoding state, error state, and a function that can be used to send fetch request 
-  // the function will also call the handler we earlier passed to useHttp with the result data
-
-  const { isLoading, error, sendRequest: fetchTasks } = useHttp({
-    url: 'https://react-http-485a4-default-rtdb.firebaseio.com/tasks.json'
-  }, transformTasks);
+  const { isLoading, error, sendRequest: fetchTasks } = useHttp();
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    const transformTasks = taskObj => {
+      const loadedTasks = [];
+
+      for (const taskKey in taskObj) {
+        loadedTasks.push({ id: taskKey, text: taskObj[taskKey].text });
+      }
+
+      setTasks(loadedTasks);
+    }
+
+    fetchTasks({
+      url: 'https://react-http-485a4-default-rtdb.firebaseio.com/tasks.json'
+    }, transformTasks);
+  }, [fetchTasks]);
 
   const taskAddHandler = (task) => {
     setTasks((prevTasks) => prevTasks.concat(task));
